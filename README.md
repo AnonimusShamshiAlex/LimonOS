@@ -51,9 +51,9 @@ make run-uefi   # запуск в QEMU (UEFI)
 
 ## 🖥️ Скриншоты системы (Интерфейс)
 
-![Рабочий стол LimonOS_0.4v](src/1.jpg)
+![LimonOS_0.4v](src/1.jpg)
 ![LimonOS_0.5v](src/2.jpg)
-![LimonOS](src/3.jpg)
+
 
 
 ## Горячие клавиши
