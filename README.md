@@ -32,6 +32,10 @@ make run-uefi   # запуск в QEMU (UEFI)
 ```
 В QEMU мышь «захватывается» кликом по окну, освободить: Ctrl+Alt+G.
 
+## ViraulBOX Download
+
+https://www.virtualbox.org/wiki/Downloads сюда лучше устанавливать старый стабильной версии
+
 ## Быстрый старт на Windows (WSL + VirtualBox)
 1. Один раз: в PowerShell от администратора `wsl --install -d Ubuntu`, перезагрузка, открыть Ubuntu и задать пароль.
 2. Распакуй архив в обычную папку (не запускай из архива) и дважды кликни `windows-run.bat`.
