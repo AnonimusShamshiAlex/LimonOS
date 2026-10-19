@@ -32,7 +32,7 @@ make run-uefi   # запуск в QEMU (UEFI)
 ```
 В QEMU мышь «захватывается» кликом по окну, освободить: Ctrl+Alt+G.
 
-## ViraulBOX Download
+## VirtualBOX Download
 
 https://www.virtualbox.org/wiki/Downloads сюда лучше устанавливать старый стабильной версии
 
