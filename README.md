@@ -61,6 +61,9 @@ https://www.virtualbox.org/wiki/Downloads сюда лучше устанавли
 ![LimonOS_0.5v](src/2.jpg)
 
 
+![LimonOS_0.7v](src/4.jpg)
+
+
 
 ## Горячие клавиши
 | Клавиша | Действие |
