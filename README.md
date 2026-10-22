@@ -192,6 +192,10 @@ aikey <сюда ваш ключ API от openrouter.ai>
 
 > ai hi my name Jucy
 
+Вот сам LimonOS0.9VAI
+[Скачать готовую сборку (.zip)](https://github.com/AnonimusShamshiAlex/LimonOS/blob/main/LimonOS9_1_AI.zip)
+
+
 ## Дорожная карта
 См. docs/TZ.md (части системы, уникальность, 13 этапов). Сделаны этапы 1–6. Дальше: загрузчик программ (Pulp) — без него `lima`-пакеты не запускаются;
 позже — проверка сертификата (X.509/RSA/ECDSA), если понадобится настоящая безопасность.
