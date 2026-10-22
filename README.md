@@ -154,6 +154,22 @@ kernel/cpuinfo.c sysinfo.c power.c  сведения о железе, питан
 kernel/limine.h      мой минимальный заголовок протокола Limine
 ```
 
+Here's the short English version:
+
+---
+
+So I built my own OS — LimonOS. Not Linux, not Unix, my own kernel, 98% C. Four days of development — already has networking, a browser, and AI right in the terminal. Yeah, I used an AI assistant, my head was killing me, tons of errors, but I understand the code, I can answer for every line. GitHub link below, on Windows you just run the bat file — it builds via WSL and Limine, check it out on a VM.
+
+What I learned in these four days: building via bat and WSL is a time bomb, moving to Docker. Kernel tests aren't a luxury, they're survival — writing basic checks for memory, timer, disk. Browser and networking are a black hole for time, limiting scope: HTTP only, text and links only, no HTTPS. AI is fine, but the rule is iron: I don't accept code until I can explain what it does. And I'm drawing the kernel diagram right now, while there's still little code.
+
+Forgot about "becoming like Linux" — Linux 0.01 was eight thousand lines and thirty years with thousands of people. My goal is "stably does what I need." About Terry Davis: it's cool to make my own OS like him, but he never asked "will I go crazy." I do — so I'm fine. TempleOS is a tragedy, not a role model. I do it for fun, in my free time.
+
+LimonOS is alive. The pace is insane, but now the main thing is stability and clarity. Slowing down, locking in the foundation: build, tests, diagram. From here it takes off. Follow the development.
+
+---
+
+
+
 ## Интерфейс скрины
 
 ![Альтернативный текст](src/1.jpg)
@@ -240,6 +256,21 @@ Ethernet ➡️ ARP ➡️ IP ➡️ ICMP (Ping) ➡️ UDP ➡️ TCP ➡️ DH
 • Скорректировать тон (сделать более официальным или, наоборот, добавить ещё больше дерзкого юмора).
 • Добавить блок со ссылкой на ваш GitHub (если планируете выкладывать в открытый доступ).
 • Помочь перевести его на английский язык для англоязычных площадок (например, Reddit r/osdev).
+
+Here's the short English version:
+
+---
+
+So I built my own OS — LimonOS. Not Linux, not Unix, my own kernel, 98% C. Four days of development — already has networking, a browser, and AI right in the terminal. Yeah, I used an AI assistant, my head was killing me, tons of errors, but I understand the code, I can answer for every line. GitHub link below, on Windows you just run the bat file — it builds via WSL and Limine, check it out on a VM.
+
+What I learned in these four days: building via bat and WSL is a time bomb, moving to Docker. Kernel tests aren't a luxury, they're survival — writing basic checks for memory, timer, disk. Browser and networking are a black hole for time, limiting scope: HTTP only, text and links only, no HTTPS. AI is fine, but the rule is iron: I don't accept code until I can explain what it does. And I'm drawing the kernel diagram right now, while there's still little code.
+
+Forgot about "becoming like Linux" — Linux 0.01 was eight thousand lines and thirty years with thousands of people. My goal is "stably does what I need." About Terry Davis: it's cool to make my own OS like him, but he never asked "will I go crazy." I do — so I'm fine. TempleOS is a tragedy, not a role model. I do it for fun, in my free time.
+
+LimonOS is alive. The pace is insane, but now the main thing is stability and clarity. Slowing down, locking in the foundation: build, tests, diagram. From here it takes off. Follow the development.
+
+---
+
 
 
 ## Дорожная карта
