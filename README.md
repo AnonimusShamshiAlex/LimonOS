@@ -261,16 +261,15 @@ Here's the short English version:
 
 ---
 
-So I built my own OS — LimonOS. Not Linux, not Unix, my own kernel, 98% C. Four days of development — already has networking, a browser, and AI right in the terminal. Yeah, I used an AI assistant, my head was killing me, tons of errors, but I understand the code, I can answer for every line. GitHub link below, on Windows you just run the bat file — it builds via WSL and Limine, check it out on a VM.
+Built my own OS — LimonOS. Not Linux, not Unix, my own kernel, 98% C. Four days in: networking, a browser, and AI right in the terminal. Yes, I used an AI assistant — head was killing me, tons of errors — but I understand every line. GitHub link below, on Windows just run the bat file (WSL + Limine), try it on a VM.
 
-What I learned in these four days: building via bat and WSL is a time bomb, moving to Docker. Kernel tests aren't a luxury, they're survival — writing basic checks for memory, timer, disk. Browser and networking are a black hole for time, limiting scope: HTTP only, text and links only, no HTTPS. AI is fine, but the rule is iron: I don't accept code until I can explain what it does. And I'm drawing the kernel diagram right now, while there's still little code.
+Lessons so far: bat + WSL build is a time bomb → moving to Docker. Kernel tests aren't luxury, they're survival. Browser/networking is a time sink → HTTP only, no HTTPS for now. AI is fine, but I don't accept code I can't explain. Drawing the kernel diagram now, while it's still small.
 
-Forgot about "becoming like Linux" — Linux 0.01 was eight thousand lines and thirty years with thousands of people. My goal is "stably does what I need." About Terry Davis: it's cool to make my own OS like him, but he never asked "will I go crazy." I do — so I'm fine. TempleOS is a tragedy, not a role model. I do it for fun, in my free time.
+Dropped the "be like Linux" dream — Linux 0.01 was 8k lines and 30 years with thousands of people. My goal: stably does what I need. Terry Davis made his OS alone too, but he never asked "will I go crazy." I do — so I'm fine. TempleOS is a tragedy, not a role model. Doing this for fun, in my free time.
 
-LimonOS is alive. The pace is insane, but now the main thing is stability and clarity. Slowing down, locking in the foundation: build, tests, diagram. From here it takes off. Follow the development.
+LimonOS is alive. Pace is insane, but now it's about stability and clarity. Slowing down, locking the foundation: build, tests, diagram. Follow along.
 
 ---
-
 
 
 ## Дорожная карта
