@@ -280,3 +280,101 @@ LimonOS is alive. Pace is insane, but now it's about stability and clarity. Slow
 ## Дорожная карта
 См. docs/TZ.md (части системы, уникальность, 13 этапов). Сделаны этапы 1–6. Дальше: загрузчик программ (Pulp) — без него `lima`-пакеты не запускаются;
 позже — проверка сертификата (X.509/RSA/ECDSA), если понадобится настоящая безопасность.
+
+
+## ENG
+
+Чтобы репозиторий LimonOS быстро находился как в поиске самого GitHub, так и в Google/Yandex, нужно оформить **`README.md`** с хорошей ключевой структурой, ключевыми словами и правильной разметкой.
+
+Вот готовый вариант **`README.md`** на английском языке (так как в сфере OSdev главный поисковый трафик идет на английском), который включает все ключевые слова для поисковиков:
+
+---
+
+```markdown
+# 🍋 LimonOS — Custom 64-bit Monolithic Operating System Kernel
+
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+[![Language: C](https://img.shields.io/badge/Language-C_98%25-brightgreen.svg)]()
+[![Bootloader: Limine](https://img.shields.io/badge/Bootloader-Limine-orange.svg)]()
+
+**LimonOS** is a custom 64-bit monolithic operating system kernel written from scratch primarily in C. It features a standalone architecture (not Linux, not Unix-derived), a custom graphical user interface (GUI) with framebuffer rendering, direct networking support, and terminal AI capabilities.
+
+---
+
+## 🌟 Key Features
+
+* **Custom x86-64 Kernel:** Built 98% in C with bare-metal low-level components.
+* **Limine Bootloader:** Modern x86_64 bootloader handoff and protocol integration.
+* **Graphical Desktop & UI:** Custom framebuffer rendering engine with windowing support.
+* **Networking & Web Capabilities:** TCP/IP stack integration with HTTP/TLS capabilities and a built-in browser client.
+* **Terminal AI Assistant:** Built-in command line interface powered by OpenRouter API (`aikey` & `ai` commands).
+* **Cross-Platform Building:** Compiles easily on Windows (via WSL2) and Linux using automated `.bat` / `.sh` build scripts.
+
+---
+
+## 🚀 Quick Start & Building
+
+### Prerequisites
+* GCC / Clang (x86_64 cross-compiler)
+* NASM / GNU Assembler
+* Limine bootloader
+* QEMU or VirtualBox (for running ISO/IMG)
+
+### Building on Windows (WSL)
+Execute the provided build script:
+```bash
+./build.bat
+
+```
+
+### Building on Linux
+
+```bash
+make
+
+```
+
+Run in QEMU:
+
+```bash
+qemu-system-x86_64 -cdrom LimonOS.iso
+
+```
+
+---
+
+## 🤖 AI Terminal Integration
+
+LimonOS supports LLM queries directly inside its built-in terminal:
+
+1. Set your OpenRouter API key:
+```text
+aikey <YOUR_OPENROUTER_API_KEY>
+
+```
+
+
+2. Ask any question:
+```text
+ai hello, explain how kernel interrupts work
+
+```
+
+
+
+---
+
+## 📚 Documentation & Wiki
+
+For architecture details, memory management layout, driver implementations, and API references, check out our official **[LimonOS Wiki](https://www.google.com/search?q=https://github.com/AnonimusShamshiAlex/LimonOS/wiki)**:
+
+* [Architecture Overview](https://www.google.com/search?q=https://github.com/AnonimusShamshiAlex/LimonOS/wiki/Architecture-Overview)
+* [Building and Running Guide](https://www.google.com/search?q=https://github.com/AnonimusShamshiAlex/LimonOS/wiki/Building-and-Running)
+* [Graphics & Framebuffer Subsystem](https://www.google.com/search?q=https://github.com/AnonimusShamshiAlex/LimonOS/wiki/Graphics-and-UI)
+* [Networking & TLS Stack](https://www.google.com/search?q=https://github.com/AnonimusShamshiAlex/LimonOS/wiki/Networking-and-TLS)
+
+---
+
+## 🏷️ Keywords & Search Tags
+
+`operating-system` `osdev` `kernel-development` `custom-kernel` `c-language` `x86-64` `limine-bootloader` `framebuffer-gui` `networking-kernel` `bare-metal` `hobby-os` `limonos`
