@@ -361,20 +361,17 @@ ai hello, explain how kernel interrupts work
 ```
 
 
-
----
-
 ## 📚 Documentation & Wiki
 
-For architecture details, memory management layout, driver implementations, and API references, check out our official **[LimonOS Wiki](https://www.google.com/search?q=https://github.com/AnonimusShamshiAlex/LimonOS/wiki)**:
+For architecture details, memory management layout, driver implementations, and API references, check out our official **[LimonOS Wiki](https://github.com/AnonimusShamshiAlex/LimonOS/wiki)**:
 
-* [Architecture Overview](https://www.google.com/search?q=https://github.com/AnonimusShamshiAlex/LimonOS/wiki/Architecture-Overview)
-* [Building and Running Guide](https://www.google.com/search?q=https://github.com/AnonimusShamshiAlex/LimonOS/wiki/Building-and-Running)
-* [Graphics & Framebuffer Subsystem](https://www.google.com/search?q=https://github.com/AnonimusShamshiAlex/LimonOS/wiki/Graphics-and-UI)
-* [Networking & TLS Stack](https://www.google.com/search?q=https://github.com/AnonimusShamshiAlex/LimonOS/wiki/Networking-and-TLS)
+* [Architecture Overview](https://github.com/AnonimusShamshiAlex/LimonOS/wiki/Architecture-Overview)
+* [Building and Running Guide](https://github.com/AnonimusShamshiAlex/LimonOS/wiki/Building-and-Running)
+* [Graphics & Framebuffer Subsystem](https://github.com/AnonimusShamshiAlex/LimonOS/wiki/Graphics-and-UI)
+* [Networking & TLS Stack](https://github.com/AnonimusShamshiAlex/LimonOS/wiki/Networking-and-TLS)
 
 ---
 
 ## 🏷️ Keywords & Search Tags
 
-`operating-system` `osdev` `kernel-development` `custom-kernel` `c-language` `x86-64` `limine-bootloader` `framebuffer-gui` `networking-kernel` `bare-metal` `hobby-os` `limonos`
+`operating-system` `osdev` `kernel-development` `custom-kernel` `c` `x86-64` `limine-bootloader` `framebuffer-gui` `networking-kernel` `bare-metal` `hobby-os` `limonos`
