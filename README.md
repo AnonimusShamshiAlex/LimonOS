@@ -212,7 +212,7 @@ aikey <сюда ваш ключ API от openrouter.ai>
 [Скачать готовую сборку (.zip)](https://github.com/AnonimusShamshiAlex/LimonOS/blob/main/LimonOS9_1_AI.zip)
 
 И вот и с командой grab что бы с сервера устоновить себе нужный key.txt ключ API для ИИ в терминале
-[Скачать готовую сборку (.zip)](https://github.com/AnonimusShamshiAlex/LimonOS/blob/main/LimonOS9_3.zi
+[Скачать готовую сборку (.zip)](https://github.com/AnonimusShamshiAlex/LimonOS/blob/main/LimonOS9_3.zip)
 
 
 LimonOS: Как я написал с нуля 64-битное монолитное ядро со своим сетевым стеком и TLS 1.3
