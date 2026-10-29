@@ -13,6 +13,8 @@
 
 ![Альтернативный текст](src/11.jpg)
 
+Full LimonOS link https://drive.google.com/file/d/1wyHT-ArkbiyD578nqy6sQKYZ_TTgKgBH/view?usp=sharing
+
 aikey file keys.txt
 
 ## Что нового в 0.9: DOM + CSS в Цитрусе
