@@ -371,7 +371,7 @@ ai hello, explain how kernel interrupts work
 
 ## 📚 Documentation & Wiki
 
-For architecture details, memory management layout, driver implementations, and API references, check out our official **[LimonOS Wiki](https://github.com/AnonimusShamshiAlex/LimonOS/wiki)**:
+For architecture details, memory management layout, driver implementations, and API references, check out our official  **[LimonOS Wiki](https://github.com/AnonimusShamshiAlex/LimonOS/wiki)**:
 
 * [Architecture Overview](https://github.com/AnonimusShamshiAlex/LimonOS/wiki/Architecture-Overview)
 * [Building and Running Guide](https://github.com/AnonimusShamshiAlex/LimonOS/wiki/Building-and-Running)
