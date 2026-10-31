@@ -8,7 +8,7 @@ https://drive.google.com/file/d/1wyHT-ArkbiyD578nqy6sQKYZ_TTgKgBH/view?usp=shari
 
 # LimonOSv1.2
 
-Стабильная версия сейчас это [Скачать файл](https://github.com/AnonimusShamshiAlex/LimonOS/LimonOS_ftp_fixed.zip)
+Стабильная версия сейчас это [Скачать файл](https://github.com/AnonimusShamshiAlex/LimonOS/blob/main/LimonOS_ftp_fixed.zip)
 
 
 
