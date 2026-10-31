@@ -9,6 +9,8 @@
 
 ![Интерфейс LimonOS](src/1.jpg)
 
+![Интерфейс LimonOS](src/14.jpg)
+
 ![Интерфейс LimonOS](src/3.jpg)
 
 ![Интерфейс LimonOS](src/4.jpg)
