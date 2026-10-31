@@ -4,6 +4,13 @@
 Ниже (1.2 и раньше) объяснено, почему `apt install nmap` пока не ставит настоящий nmap. Это
 остаётся правдой. Но теперь это не просто объяснение — это план из 6 проверяемых фаз (1-2 готовы и проверены на хосте, 3-5 написаны и ждут проверки на QEMU).
 
+https://drive.google.com/file/d/1wyHT-ArkbiyD578nqy6sQKYZ_TTgKgBH/view?usp=sharing Full LimonOS Project file все версии
+
+# LimonOSv1.2
+
+Стабильная версия сейчас это [Скачать файл](https://github.com/AnonimusShamshiAlex/LimonOS/LimonOS_ftp_fixed.zip)
+
+
 
 # Интерфейс
 
