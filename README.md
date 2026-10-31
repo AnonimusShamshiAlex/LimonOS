@@ -1,5 +1,39 @@
 # LimonOS 🍋
 
+![Описание картинки](src/1.jpg)
+
+![Описание картинки](src/2.jpg)
+
+![Описание картинки](src/3.jpg)
+
+![Описание картинки](src/4.jpg)
+
+![Описание картинки](src/5.jpg)
+
+![Описание картинки](src/6.jpg)
+
+![Описание картинки](src/7.jpg)
+
+![Описание картинки](src/8.jpg)
+
+![Описание картинки](src/9.jpg)
+
+![Описание картинки](src/10.jpg)
+
+![Описание картинки](src/11.jpg)
+
+![Описание картинки](src/12.jpg)
+
+![Описание картинки](src/13.jpg)
+
+![Описание картинки](src/14.jpg)
+
+вот на фулл https://drive.google.com/file/d/1wyHT-ArkbiyD578nqy6sQKYZ_TTgKgBH/view?usp=sharing все версии
+
+вот на исо https://drive.google.com/file/d/1hC04tYYwzSlnmKJEU6oVDjFBrDNAF7hy/view?usp=sharing стабил
+
+вот на стабил зип https://drive.google.com/file/d/1bpY8QFvhDPfo0e6TPtS5QHUcCVgRu8YE/view?usp=sharing
+
 ## В работе: путь к настоящему запуску программ (см. docs/USERSPACE_PLAN.md)
 Ниже (1.2 и раньше) объяснено, почему `apt install nmap` пока не ставит настоящий nmap. Это
 остаётся правдой. Но теперь это не просто объяснение — это план из 6 проверяемых фаз (1-2 готовы и проверены на хосте, 3-5 написаны и ждут проверки на QEMU).
