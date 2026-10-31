@@ -1,3 +1,446 @@
+# ENG
+# LimonOS 🍋
+
+![Image description](src/1.jpg)
+
+![Image description](src/2.jpg)
+
+![Image description](src/3.jpg)
+
+![Image description](src/4.jpg)
+
+![Image description](src/5.jpg)
+
+![Image description](src/6.jpg)
+
+![Image description](src/7.jpg)
+
+![Image description](src/8.jpg)
+
+![Image description](src/10.jpg)
+
+![Image description](src/11.jpg)
+
+![Image description](src/12.jpg)
+
+![Image description](src/14.jpg)
+
+Here's the full set: https://drive.google.com/file/d/1wyHT-ArkbiyD578nqy6sQKYZ_TTgKgBH/view?usp=sharing — all versions
+
+Here's the ISO: https://drive.google.com/file/d/1hC04tYYwzSlnmKJEU6oVDjFBrDNAF7hy/view?usp=sharing — stable
+
+Here's the stable zip: https://drive.google.com/file/d/1bpY8QFvhDPfo0e6TPtS5QHUcCVgRu8YE/view?usp=sharing
+
+## In progress: the path to actually running programs (see docs/USERSPACE_PLAN.md)
+Below (1.2 and earlier) explains why `apt install nmap` doesn't yet install a real nmap. That
+remains true. But now it's not just an explanation — it's a plan of 6 verifiable phases (1-2 are done and verified on the host, 3-5 are written and awaiting verification on QEMU).
+
+**Phase 1 (done):** `kernel/elf.c` parses and validates a real ELF64 file (magic, class,
+architecture, program headers, PT_LOAD segments, overlaps, entry point) — `tests/elf_host.c`
+runs this on a real binary built with the system `ld`, and on a set of deliberately broken files.
+
+**Phase 2 (done):** `kernel/vmm.c` — x86_64 page tables per process (PML4→PDPT→PD→PT):
+map/unmap/translate address, plus a "shared upper half" between kernel and process (like
+in Linux — the upper 256 PML4 entries are shared, the lower 256 are per-process).
+`tests/vmm_host.c` verifies all this logic on the host through fake physical memory.
+
+**Phase 3 (code written, everything possible verified on the host; ring3 on real hardware — you'll have to verify):**
+The GDT now contains ring3 segments (data 0x1B, code 0x23) and a TSS with an `rsp0` stack
+(`kernel/gdt.c`, the pure part — `kernel/ring3.h`). `kernel/user.c` + `kernel/usermode.S` create
+a separate address space (its own PML4 + the shared upper half of the kernel, Phase 2), place a
+tiny program into it, and do `iretq` into ring3; the kernel takes control back via an exception
+or the timer. The **`ring3`** command in the LimonOS terminal runs three checks:
+1. `hlt` from ring3 → #GP, while the user stack works (push/pop);
+2. reading kernel memory from ring3 → #PF with code 0x5 (kernel page protection);
+3. an infinite loop in ring3 → the timer (IRQ0) via the TSS stack returns control to the kernel.
+
+`tests/gdt_host.c` (ASan/UBSan, `tests/run_host_tests.sh`) verifies on the host: descriptor bytes
+(canonical values + an independent decoder), the TSS, the `iretq` frame, #PF parsing, USER
+permissions on all page-table levels, the bytes of the ring3 programs themselves, and that the result
+checks reject any corruption (verified with mutations). **Not verified and cannot be verified in an environment without QEMU:** that the CPU
+actually accepted the GDT/TSS, executed `iretq` into ring3 and returned. This is done like this:
+`make iso && make run`, in the LimonOS terminal type `ring3`. If the VM reboots —
+`qemu-system-x86_64 -cdrom LimonOS.iso -m 256M -d int,cpu_reset -no-reboot` will show on which
+exception (see docs/USERSPACE_PLAN.md, Phase 3 section).
+
+**Phase 4 (code written, ring3 on real hardware — you'll have to verify):** system calls via `int 0x80`
+(Linux numbers: `read`, `write`, `brk`, `exit`), real heap growth via `brk`, pointer validation
+(`-EFAULT`), `-ENOSYS`. The `ring3` command now does 6 checks; `tests/syscall_host.c` verifies
+the dispatcher on the host (details and exactly what hasn't been verified — in docs/USERSPACE_PLAN.md).
+
+**Phase 5 (code written; ring3 on real hardware — you'll have to verify):** a mini-libc (`userland/`: `_start`, `read/write/brk/exit`,
+string, `malloc`, `printf` without float) and the **first real ELF** `hello.elf`, built with gcc+ld and embedded into the kernel.
+In the LimonOS terminal: `run hello.elf LimonOS` (or `lima run hello.elf LimonOS`); any of your own static ELFs against this set of calls
+can be placed in Memoria and run the same way. The libc was verified on the host as a real Linux process and against glibc (162 thousand
+printf comparisons); the loader — by actually running the loaded image. `ring3` now does 7 checks. Details and what hasn't been verified — in docs/USERSPACE_PLAN.md.
+
+Tests — without an emulator, run by `tests/run_host_tests.sh`. What's next (system calls,
+mini-libc) and why even this won't let you run a real Linux nmap — in detail in
+docs/USERSPACE_PLAN.md.
+
+## What's new in 1.2 — Memoria, File Manager, Task Manager
+
+### The main thing: honestly about apt/nmap/python/git/msfconsole/sqlmap
+You asked me to make it so that `apt install nmap` (and python, git, msfconsole, sqlmap) actually install and run these
+programs — "so it works like in Termux." **This has not been done, and here's why I didn't pretend it was:**
+LimonOS physically lacks what's needed to run someone else's code — there's no executable loader (ELF/PE), no
+system calls, no libc, no Python/Ruby interpreters. This isn't "adding a command," it's a separate
+multi-month job (writing your own loader + syscall layer + libc from scratch). Passing it off as done would be a lie.
+
+Instead of a fake success, the `lima`/`apt`/`apt-get` command honestly responds to these packages: "someone else's program, LimonOS
+can't run it yet" — and shows what already really works instead of them:
+- `nmap` → **`scan`** — its own port scanner, already working.
+- `sqlmap`, `msfconsole`, `wireshark` → `scan`, **`seal`** (TLS/https check), `ai` (ask the model).
+- `python` → **`abacus`** — an expression calculator (`abacus 2+3*(4-1)`).
+- `git` → `grab` — downloads a single file over http(s); there's no full git client.
+
+### Memoria — real folders instead of a single file list
+Previously all downloaded files sat in one flat list. Now it's a tree of folders in RAM (lives until shutdown — writing
+to disk still isn't done): `/Desktop`, `/Downloads`, `/Music`, `/Pictures`, `/System`.
+Commands work like in a Linux shell: `ls [path]`, `cd folder` (and `cd ..`), `pwd`, `mkdir name`, `cp`, `mv`, `rm`/`drop`,
+`cat`/`peek`, `sha`, `upload`. `grab` now saves the file to the current folder (by default — `/Downloads`).
+
+While developing, I caught a real bug myself: at the root `parent` pointed to itself, so the listing of the root folder
+showed itself as a subfolder. Fixed it and pinned it with a test (`tests/vfs_host.c`), so it doesn't come back.
+
+### File Manager (GUI)
+A new window, opened by an icon, from the "Lemon" menu, or by command — double-click enters a folder, `N` — create a folder
+(entering the name right in the window), `Delete` — delete the selection, the size of each file and the path are visible.
+
+### Task Manager (GUI) + `top`/`ps`/`kill`
+A list of open windows (type, title, active/minimized), close by clicking "×" or with the `kill <number>` command (the number
+from `top`). Below — memory: heap usage, free RAM, Memoria size, uptime, CPU.
+
+### Memory for heavy tasks
+The heap is no longer a fixed 32 MiB: at boot it measures the real free RAM and takes half of it
+for the heap (from 8 to 256 MiB), plus it can still grow further on demand. This doesn't make it possible to run msfconsole
+or similar (see above, why), but on an old PC with little RAM the system now doesn't try to allocate more than it has.
+
+### More like Linux, but not Linux
+Added aliases: `top`, `ps`, `kill`, `free`, `df`, `uname`, `whoami`, `apt`/`apt-get`. `uname` says outright:
+"LimonOS, not Linux and not compatible with it at the program level" — so as not to create false expectations.
+
+### Verified (host, without hardware and without an emulator)
+`tests/run_host_tests.sh` runs: format strings, games (ASan/UBSan), FAT32, **Memoria/VFS** (new, ASan/UBSan),
+kernel build without warnings, and screenshots of the desktop **and the new windows** (`tests/desktop_shot2.c`) — File Manager,
+creating a folder via the GUI, Task Manager.
+
+---
+
+## What's new in 1.1 "Punk"
+
+### The screenshot bug (`grab` + `aikey file`) — found and fixed
+There were two causes at once:
+1. **You were downloading a page, not a file.** `grab http://192.168.0.113:8000 key.txt` — there's no path in the address, and `http.server`
+   returned the *directory listing* (HTML, 4381 bytes, the same sha256 in both runs). The second argument is only the *name in memory*.
+   Now, if there's no path in the address and a name is given, `grab` downloads `address/name` itself. If the server still sends HTML under
+   a "non-html" name — it warns. `aikey file` on an HTML page honestly says "this is not a key."
+2. **A bug in `format.c`:** there was no `%.47s` precision. The file name was saved and printed literally as `%.47s`
+   (that's why `files` showed `%.47s`, and `aikey file key.txt` couldn't find the file). Now `%.N`, `%.*s`, `%*d`, `z`, `h` are supported.
+
+### Security and stability
+- Heap: block tags, protection against double/foreign `kfree`, protection against size overflow, `kcalloc`, **automatic heap growth**
+  (previously on exhausting 32 MiB — `NULL`), merging only physically adjacent blocks.
+- API key: doesn't get into command history (↑), wiped on the stack, `ai dump` shows only the beginning/end.
+- File names in memory: `/`, `\`, control characters forbidden; UTF-8 trimming without breaking a character.
+- **Proxy mode** `aikey proxy http://192.168.0.5:8787 [anthropic|openrouter]` + `tools/ai_proxy.py`: the old PC speaks over
+  plain HTTP, only the main PC stores the key (it isn't in LimonOS at all), TLS isn't needed on the old CPU.
+- Screen: RGB/BGR support, 16/24/32 bit and arbitrary pitch (on a non-standard format we draw to a buffer and convert colors).
+
+### Hardware
+- **Realtek RTL8139** (`rtl8139.c` driver) alongside Intel e1000, automatic selection (`nic.c`).
+- **ATA PIO + FAT32 (read-only)**: `disks`, `ls [path]`, `load file [name]`; long names, Cyrillic, MBR.
+  Example: put `KEY.TXT` on a FAT32 disk → `load KEY.TXT` → `aikey file KEY.TXT`.
+- ⚠ **Honestly:** RTL8139 and ATA were written to spec and have NOT yet been run on real hardware (there's no emulator in this environment).
+  FAT32 and the games were verified on the host; the desktop — with screenshots on the host. USB flash drives, AHCI and NVMe aren't supported yet.
+
+### "Punk" style and games
+- New main theme **punk** (dark, acid lime + pink), also **riot** and **vapor**; the old themes remain (`tint lemon`).
+  Windows with black outlines and a hard shadow, hatched title bars, a lemon in glasses, a glitch logo, wallpaper cache (faster on an old PC).
+- Games (desktop icons, "Lemon" menu, `play` command): **Snake, Tetris, Pong (mouse or arrows), 2048**.
+  They start paused, pause themselves when you switch to another window, records live until shutdown.
+- Verification: `tests/run_host_tests.sh` (format, games under ASan/UBSan, FAT32, build without warnings, desktop screenshots).
+
+### Known gaps (still)
+No TLS certificate verification (so the proxy is the preferred path for AI), no USB, no writing to disk,
+no running ELF/.exe, no sound.
+
+---
+
+
+An operating system of my own, from scratch (x86_64). Bootloader: Limine.
+
+## What's new in 1.0: merging all branches into one system
+I combined into one LimonOS what until then had grown in four separate archives:
+
+- **ai / aikey** — talking to Claude or other models via OpenRouter right in the terminal (already there)
+- **The "Limonka" Calculator** — a separate window on the desktop, its own fixed-point arithmetic
+  (no loss of precision like `0.1+0.2=0.3`, not `0.30000000004`), by mouse or keyboard
+- **The new Citrus browser** — a full engine: CSS parsing (colors, classes, selectors), forms
+  (GET/POST, buttons), back/forward history, address bar, relative links, windows-1251 encoding
+  for old Russian sites, `<meta refresh>`. Works through my already-verified
+  HTTP/TLS client (I didn't touch it — it was reliable, it stayed reliable)
+- **scan** (its own port scanner) — as it was, unchanged
+
+### A serious bug I found and fixed during the merge
+The ported browser's `struct page` (counters for lines/links/forms/input fields) was never zeroed
+at the start of `page_render()`. If the calling code declares `struct page pg;` on the stack in the usual way
+(without explicit initialization — and that's exactly how it's used) — the counters start with garbage from the stack.
+For a page with `<form>` this meant writing `pg->forms[pg->nforms]` at a random index — sometimes
+it worked, sometimes not, depending on what had been in memory before. I caught this not by guessing:
+- first I reproduced the instability (3 out of 5 runs crashed on the same page)
+- enabled deterministic glibc heap corruption (`MALLOC_PERTURB_`), stack tracing via `backtrace()`
+  and `addr2line` — without a single external debugger, only what's in the system
+- narrowed it down to a minimal case: `<form></form>` with no attributes at all still crashes on the 4th attempt
+- after the fix (one `memset(pg, 0, sizeof *pg)` at the start of `page_render`) — 0 crashes out of 50 attempts
+  on the minimal case, 0 out of 50 on the full page, 0 out of 20 over the real network
+
+## What's new in 0.9.3: transferring text from Windows without manual typing
+A real shared clipboard with Windows in VirtualBox is a separate driver (VirtualBox Guest
+Additions, VMMDev + HGCM protocol, a virtual PCI device). I didn't take it on: in my
+sandbox there's no VirtualBox itself, so I can neither verify nor even see this device —
+handing over an unverified binary protocol would be dishonest.
+
+Instead — a working method through what we've already verified: the network. Put the key in a file on
+Windows, bring up a local server with one command, download the file with the `grab` command, and then:
+
+**`aikey file file-name`** — takes the key right from the already downloaded file (as after `grab`), trims `\n`, `\r\n` (if the file is from Windows) and the surrounding spaces itself, and determines the provider itself.
+The hint with the exact steps is now built in — just type `aikey` without arguments.
+
+I verified the trimming logic separately: `\n` line break, `\r\n` from Windows, surrounding spaces without
+a line break, an empty file, text without any signs of a key — all cases are handled correctly.
+
+## What's new in 0.9.2: diagnosing "User not found" from OpenRouter
+Based on the third screenshot: the key in LimonOS matches the key in the OpenRouter panel character for character
+(and the status there is "Enabled"), but the server consistently responds `401: User not found.` — and this is a REAL
+response from the real OpenRouter server (not a disconnect, not a timeout), which means TLS and HTTPS definitely work.
+
+I read the request-building code — I found no errors. I verified with a separate test on the host: with the key
+"sk-or-v1-4b5bef...2d426f7" (72 characters), the key goes into the `Authorization: Bearer` header byte
+for byte, without truncation and without distortion. That is, on the LimonOS side the request is formed correctly —
+guessing further from the code is pointless, I need to see the real bytes on real hardware.
+
+I added the **`ai dump <question>`** command — it shows EXACTLY what will go to the server (address,
+headers, key unmasked, request body), without sending anything. It uses the same request-building code
+as the real `ai` (not a separate copy) — that is, what you see in dump is what will fly.
+Compare the `ai dump` output with the key from the OpenRouter panel character by character — if it matches (and logically
+it should), then the problem isn't LimonOS but the key/account on the OpenRouter side:
+- try waiting 1-2 minutes after creating the key (OpenRouter has an activation delay)
+- check the same key outside LimonOS (e.g. via curl or the openrouter.ai site) — if it's also
+  "User not found" there, then the problem is definitely not in our code
+
+## What's new in 0.9.1: found the cause of "?" instead of " in long commands
+In your second screenshot you can see: when typing a long key, a "?" appeared on the left instead of the expected
+"«" — the scroll indicator. The cause is a classic C bug: I wrote `(uint32_t)'\xab'`, and `char`
+on this compiler is signed, so 0xAB (171) first became -85, and when extended to uint32_t
+it became 0xFFFFFFAB instead of 0x000000AB — the font doesn't find such a "character" and draws "?" as a substitute.
+Fixed it to the direct literal `0xAB` — no intermediate char, no sign extension.
+Confirmed on the host with a small C program: `(uint32_t)'\xab'` = 0xffffffab, `(uint32_t)0xAB` = 0x000000ab.
+
+**Important**: the key itself was entered and accepted correctly — the bug was only in drawing the scroll
+indicator, the actually entered string wasn't corrupted. And the `401: User not found.` response in your
+screenshot is a response from the real OpenRouter server (not a LimonOS error): it means TLS, HTTPS and JSON
+parsing all worked correctly against the real internet, but the OpenRouter key itself wasn't recognized —
+most likely a typo when entering it (hard to notice because of the "?" on the screen) or the key isn't active.
+Recheck the key at openrouter.ai/keys and enter it again — it will work now.
+
+## What's new in 0.9: two real bugs from your screenshot — fixed
+Based on the VirtualBox screenshot, two real bugs were found (not in the sandbox — in your run):
+
+1. **The input line was cut off at the 72nd character** — so you couldn't finish typing the long API key.
+   Now the input line scrolls horizontally (like in a normal terminal): the limit was raised
+   to 1024 characters, when the screen width is insufficient "«" and "»" appear at the edges, the cursor is always visible.
+   Verified by exhaustive testing: typing, moving the cursor to any position and deleting for ALL
+   line lengths from 1 to 1024 characters — the cursor never once went off the edge of the screen.
+
+2. **`aikey` only understood Anthropic keys (`sk-ant-...`)**, but yours turned out to be an OpenRouter
+   key (`sk-or-v1-...`) — that's why `ai` couldn't work, even if the key had been entered in full.
+   Now `aikey` recognizes both formats itself and contacts the right service:
+   - `sk-ant-...` → Anthropic (api.anthropic.com, default model claude-haiku-5-5)
+   - `sk-or-v1-...` → OpenRouter (openrouter.ai, default model openrouter/auto — picks itself)
+   The `aikey model name` command lets you change the model manually for either of the two.
+
+I found and verified both bugs with tests BEFORE giving them to you: exhaustive testing for scrolling (1..1024
+characters) and simulation of both API servers (Anthropic and OpenRouter) with quotes, line breaks,
+unicode via \u and a wrong key (401) — all five scenarios pass.
+
+**The main thing, honestly**: the line scrolling itself and JSON parsing are verified exhaustively. But whether
+the REAL api.anthropic.com or openrouter.ai will actually respond to your key — that's the first real check
+on your hardware, I still have no internet here. If `ai` still doesn't respond — send me what the terminal
+shows, and we'll figure it out further.
+
+## What's new in 0.8: google actually works now, ai right in the terminal
+- `google` now goes to DuckDuckGo (html.duckduckgo.com) — simple markup without JS specifically for such cases, previously it parsed Google and hit captchas/different layouts
+- **`ai <question>`** — talking with Claude right from the LimonOS terminal, over https, via the Anthropic API. Key: `aikey sk-ant-...` (stored only in session memory, it isn't and won't be in the code). Default model — claude-haiku-5-5, change it: `aikey model <name>`
+- The HTTP client learned its own headers (needed for the API key) — `extra_headers` in http_opts
+- JSON parsing in ai.c: found and fixed two of my own bugs with tests — the search took the first occurrence of the word instead of the key, and the escaped quote `\"` inside the text wrongly terminated the string. Verified with a host test simulating the Anthropic server (quotes, `\u`-unicode, line break, 401 error)
+- **Note**: the ai command was not tested against the real api.anthropic.com (there's no internet in the sandbox) — the logic and JSON parsing were verified on a simulation, but see what it responds with on a real key, and write if something's wrong
+
+## What's new in 0.7: port scanner, search, gzip protection
+- `scan <host> [port(s)]` — its own port scanner (a replacement for nmap, which can't be run on LimonOS — see "Why not nmap" below). Distinguishes open/closed(RST)/no response
+- `google <query>` — search from the terminal and the Citrus browser, over https
+- The HTTP client honestly refuses if the server sent gzip/br instead of plain text (`HTTP_E_ENCODING`), rather than showing garbage — gzip decompression will be a separate step
+- tcp_connect now distinguishes "port closed" (RST received, no need to wait) and "port filtered/no response"
+
+### Why you can't run real nmap and Telegram in LimonOS
+These are ready-made programs for Linux: dozens of Linux kernel system calls, libraries (OpenSSL, ncurses, and for Telegram also Qt for the interface). To run them "as is," you need a compatibility layer on the level of Wine — that's a separate multi-year project, not the next step. LimonOS's path is different and already in the spec (the Pulp stage): its own program loader + its own small utilities for its own instruction set. `scan` is exactly that "own nmap" on this path.
+
+## What's new in 0.6: https and reliable TCP
+- **TLS 1.3** (my own, from scratch): X25519, ChaCha20-Poly1305 and AES-128-GCM, SHA-256, HKDF. Files: `crypto.c`, `tls.c`
+- **HTTP client** `http.c`: https, redirects (301/302/303/307/308), chunked, Content-Length, POST/PUT. https→http redirect is forbidden
+- **Reliable TCP**: retransmission of lost segments, SACK, fast retransmit, RTT estimation, 64 KB receive buffer with an honest window, out-of-order packet reassembly
+- Commands: `grab <url> [name]` (download to memory), `files`, `peek name [hex]`, `sha name`, `drop name`, `upload name <url> [put]`, `seal host` (TLS check), `citrus <url>` now understands https, `lima` downloads from GitHub over https
+- Heap 32 MiB; virtual machine: 2 GB memory, 2 cores, 10 GB disk (the disk will work after the AHCI/FAT32 driver — stage 7)
+- **Note:** the server certificate is NOT verified yet (traffic is encrypted, but there's no protection against server spoofing). The commands show the SHA-256 fingerprint of the certificate — it can be checked via `openssl s_client`. Chain verification is the next step
+
+## Tests (on regular Linux, without running the OS)
+```
+python3 tests/test_crypto.py     # ciphers against hashlib/cryptography and RFC vectors
+tests/run_tls_test.sh            # our TLS against a real OpenSSL server
+sudo tests/run_netstack_test.sh  # the entire LimonOS network stack via TAP: http/https, redirect, chunked, upload, packet loss
+```
+
+## What it can do (stage 5)
+- TCP client and HTTP (GET), only http:// — it recognizes redirects to https without TLS and honestly reports them
+- Citrus — a simple text browser: `citrus example.com`, arrows/PgUp/PgDn — scrolling
+- `ping` as another name for the `sonar` command
+- Lima — program manager: `lima list`, `lima install cscan` (downloads the README from GitHub),
+  then `cscan <arguments>` shows the package card (no running yet — there's no program loader)
+
+## What was before (stage 4)
+- Memory: page manager, `kmalloc` heap
+- PCI bus, Intel e1000 network card driver (used by VirtualBox)
+- Vine network: ARP, IP, ICMP (ping), UDP, DHCP, DNS — internet access
+- Environment detection (VirtualBox, QEMU, real hardware) via CPUID
+
+## What was before (stage 3)
+- Booting via BIOS and UEFI, own GDT, IDT, interrupts
+- Timer (100 Hz), PS/2 keyboard (EN + RU, F2 switching), PS/2 mouse
+- Desktop: wallpaper, icons, windows (dragging, minimize, close),
+  taskbar, "Lemon" menu, 5 themes, clock
+- Terminal with its own commands, history (up/down arrows) and line editing
+- Hardware data: processor (CPUID), memory map, BIOS clock
+
+## Build and run (Ubuntu / Debian / WSL)
+```
+sudo apt install build-essential nasm qemu-system-x86 xorriso git ovmf
+make iso        # will build the kernel and the LimonOS.iso image (downloads Limine the first time)
+make run        # launch in QEMU (BIOS)
+make run-uefi   # launch in QEMU (UEFI)
+```
+In QEMU the mouse is "captured" by clicking on the window, release it: Ctrl+Alt+G.
+
+## Quick start on Windows (WSL + VirtualBox)
+1. Once: in PowerShell as administrator `wsl --install -d Ubuntu`, reboot, open Ubuntu and set a password.
+2. Unpack the archive into a regular folder (don't run it from the archive) and double-click `windows-run.bat`.
+   It will build the image inside WSL, create a virtual machine in VirtualBox and launch it.
+3. In the LimonOS window open the terminal and type `vine`, `sonar 8.8.8.8`, `lookup example.com`.
+
+## Running in VirtualBox (in detail)
+1. Build the image in Linux/WSL: `make iso`
+2. Linux/WSL with VirtualBox: `make vbox`. Windows: run `scripts\vbox-create.bat`.
+   The script creates the machine itself: 512 MB, BIOS, NAT network with an Intel PRO/1000 MT card, PS/2 mouse.
+3. In the system: `vine` (address), `sonar 8.8.8.8` (ping), `lookup example.com` (DNS), `pci` (devices).
+Manually: Type "Other/Unknown (64-bit)", System: PIIX3 chipset, enable I/O APIC, EFI off;
+Network: NAT, Intel PRO/1000 MT Desktop adapter; Pointing: PS/2 (not a USB tablet).
+The mouse in VirtualBox is captured by clicking, release it — right Ctrl.
+
+## Hotkeys
+| Key | Action |
+|---|---|
+| F2 | RU / EN layout |
+| F3 | new terminal |
+| F4 | close the active window |
+| F5 | next theme |
+| Alt+Tab | switch window |
+| Ctrl+L / Ctrl+C / Ctrl+U | clear / cancel line / erase line |
+
+## Terminal commands (each has a Russian name)
+| Command | Rus. | What it does |
+|---|---|---|
+| zest | цедра | list commands |
+| squeeze | выжать | clear the terminal screen |
+| peel | кожура | system info with a lemon |
+| juice | сок | memory: how much juice is left |
+| engine | мотор | processor and its capabilities |
+| sundial | время | date and time (BIOS clock) |
+| pulse | пульс | how long the system has been running |
+| say | сказать | repeat what was said |
+| abacus | счёты | calculator: `abacus 2+3*(4-1)` |
+| palette | краски | colors and themes |
+| tint | оттенок | change theme: `tint lime` |
+| lang | язык | layout: `lang ru` / `lang en` |
+| twin | двойник | another terminal |
+| pci | шина | motherboard devices |
+| ping | — | the same as sonar |
+| citrus | цитрус | simple browser: `citrus example.com` |
+| lima | лима | install programs: `lima list`, `lima install cscan` |
+| vine | лоза | network; `vine dhcp` — get an address |
+| sonar | эхо | ping: `sonar 8.8.8.8` |
+| lookup | найти | DNS: `lookup example.com` |
+| omen | знамение | lemon prediction |
+| rebirth | заново | reboot |
+| bye | пока | shutdown |
+
+## Writing to a flash drive
+First check the image in QEMU, then:
+```
+sudo ./scripts/write-usb.sh LimonOS.iso
+```
+The script will show the disks and require confirmation, the data on the flash drive will be erased.
+On Windows: Rufus, "DD-image" mode.
+
+## Structure
+```
+kernel/kernel.c      entry point, starts all subsystems
+kernel/gdt.c idt.c pic.c isr.S interrupts.c   interrupts (on a kernel error — panic screen)
+kernel/timer.c rtc.c keyboard.c mouse.c ps2.c  devices
+kernel/gfx.c         graphics with double buffering
+kernel/font.c        font 8x16 (generated by tools/gen_font.py, needs Pillow)
+kernel/term.c shell.c  terminal and commands
+kernel/desktop.c     desktop and windows
+kernel/cpuinfo.c sysinfo.c power.c  hardware info, power
+kernel/limine.h      my minimal Limine protocol header
+```
+
+## Limitations (honestly)
+- Sites almost always ask for HTTPS (TLS), and we only have plain http so far — `citrus`/`lima` will honestly say so if the site redirects.
+- Packages installed via `lima` only show a card (name, parameters, README) — there's nothing to run someone else's code with yet, that's the next big stage (Pulp).
+- The Citrus browser is text-only: no images, no following links, no CSS.
+- Network card only Intel e1000 (VirtualBox, QEMU `-nic model=e1000`). Real PCs need drivers for other cards.
+- The network card's memory is mapped via the bootloader's HHDM (cacheable). In VirtualBox that's enough, real hardware needs its own page tables.
+- Only PS/2 keyboard and mouse. On real PCs with a USB keyboard it works if the BIOS emulates PS/2 (Legacy USB Support); a proper USB driver (xHCI) is a separate stage.
+- The desktop is drawn at most at 1920x1080, on larger screens it occupies the top-left corner.
+- `limine.h` was written by me by hand; if the `juice` command says "memory map unavailable," replace it with the official one from the Limine repository.
+- If Limine complains about the `resolution:` line in limine.conf, just delete it.
+
+## Roadmap
+See docs/TZ.md (parts of the system, uniqueness, 13 stages). Stages 1–5 and TLS are done. Next: certificate verification, disk driver + FAT32 (10 GB), program loader (Pulp).
+
+
+## ftp — like ftp.exe in Windows
+
+```
+lemon> ftp 192.168.0.103
+Connecting to 192.168.0.103:21 (FTP) ...
+220 Microsoft FTP Service
+Connected to 192.168.0.103.
+User (192.168.0.103:(none)): dr
+331 Password required
+Password:
+230 User logged in.
+ftp> ls
+ftp> cd "Program Files"
+ftp> get file.txt
+ftp> bye
+```
+
+* `ftp` without a host just opens `ftp>`; you can connect with the `open host [port]` command.
+* Nothing is executed on its own: neither `ls`, nor `get`, nor exit. You leave `ftp>` only with `bye` / `quit`.
+  A command error, wrong password, connection loss or Ctrl+C keeps you in `ftp>`.
+* Commands: open, close, user, ls, dir, cd, cdup, pwd, l
+
+# Rus
 # LimonOS 🍋
 
 ![Описание картинки](src/1.jpg)
