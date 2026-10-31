@@ -10,6 +10,8 @@ https://drive.google.com/file/d/1wyHT-ArkbiyD578nqy6sQKYZ_TTgKgBH/view?usp=shari
 
 Стабильная версия сейчас это [Скачать файл](https://github.com/AnonimusShamshiAlex/LimonOS/blob/main/LimonOS_ftp_fixed.zip)
 
+https://drive.google.com/file/d/1hC04tYYwzSlnmKJEU6oVDjFBrDNAF7hy/view?usp=sharing там iso
+
 
 
 # Интерфейс
