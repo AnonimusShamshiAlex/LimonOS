@@ -11,8 +11,6 @@
 
 ![Интерфейс LimonOS](src/14.jpg)
 
-![Интерфейс LimonOS](src/3.jpg)
-
 ![Интерфейс LimonOS](src/4.jpg)
 
 ![Интерфейс LimonOS](src/5.jpg)
