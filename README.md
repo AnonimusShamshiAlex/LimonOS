@@ -1,6 +1,11 @@
 # ENG
 # LimonOS 🍋
 
+# Bare metal boot
+
+![Image description](src/rell.jpg
+
+
 [LimonOS.iso Download](https://github.com/AnonimusShamshiAlex/LimonOS/blob/main/LimonOS.iso)
 
 OR
